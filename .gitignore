@@ -12,3 +12,9 @@ mynpcs/
 !zombie_riot.inc
 !textstore.inc
 !adt_trie_sort.inc
+CLAUDE.md
+addons/sourcemod/scripting/64compile.sh
+addons/sourcemod/scripting/compile.sh
+addons/sourcemod/scripting/include/stocksoup/
+addons/sourcemod/scripting/spcomp
+addons/sourcemod/scripting/spcomp64

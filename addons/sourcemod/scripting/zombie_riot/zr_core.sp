@@ -393,6 +393,7 @@ ConVar Cvar_VshMapFix;
 ConVar CvarNoSpecialZombieSpawn;
 ConVar zr_disablerandomvillagerspawn;
 ConVar zr_waitingtime;
+ConVar zr_freeplay_duration;
 ConVar zr_maxscaling_untillhp;
 ConVar zr_maxsbosscaling_untillhp;
 ConVar zr_raidmultihp;

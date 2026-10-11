@@ -153,6 +153,7 @@ static int WaveGiftItem;
 static char LastWaveWas[64];
 
 static int Freeplay_Info;
+static int Freeplay_DurationMinutes;
 //static bool Freeplay_w500reached;
 static float MinibossScalingHandle = 1.0;
 static float Freeplay_TimeCash;
@@ -2898,7 +2899,8 @@ bool Waves_Progress(bool donotAdvanceRound = false,
 						
 						if(i_WaveHasFreeplay > 0)
 						{
-							FreeplayTimeLimit = GetGameTime() + 3607.5; // one hour and 7.5 extra seconds because of setup time smh
+							Freeplay_DurationMinutes = zr_freeplay_duration.IntValue;
+							FreeplayTimeLimit = GetGameTime() + (Freeplay_DurationMinutes * 60.0) + 7.5; // 7.5 extra seconds because of setup time
 							
 							if(i_WaveHasFreeplay == 1)
 							{
@@ -3170,6 +3172,30 @@ bool Waves_Progress(bool donotAdvanceRound = false,
 	return false;
 }
 
+static void Freeplay_FormatDuration(int client, char[] buffer, int length)
+{
+	int hours = Freeplay_DurationMinutes / 60;
+	int minutes = Freeplay_DurationMinutes % 60;
+
+	char hourText[64], minuteText[64];
+	if(hours == 1)
+		Format(hourText, sizeof(hourText), "%T", "Freeplay Duration Hour", client, hours);
+	else if(hours > 1)
+		Format(hourText, sizeof(hourText), "%T", "Freeplay Duration Hours", client, hours);
+
+	if(minutes == 1)
+		Format(minuteText, sizeof(minuteText), "%T", "Freeplay Duration Minute", client, minutes);
+	else if(minutes > 1)
+		Format(minuteText, sizeof(minuteText), "%T", "Freeplay Duration Minutes", client, minutes);
+
+	if(hours && minutes)
+		Format(buffer, length, "%T", "Freeplay Duration Join", client, hourText, minuteText);
+	else if(hours)
+		strcopy(buffer, length, hourText);
+	else
+		strcopy(buffer, length, minuteText);
+}
+
 static Action Freeplay_HudInfoTimer(Handle timer)
 {
 	switch(Freeplay_Info)
@@ -3212,7 +3238,9 @@ static Action Freeplay_HudInfoTimer(Handle timer)
 				{
 					SetHudTextParams(-1.0, -1.0, 7.5, 0, 255, 255, 255);
 					SetGlobalTransTarget(client);
-					ShowSyncHudText(client, SyncHud_Notifaction, "%t", "freeplay_start_4");
+					char duration[64];
+					Freeplay_FormatDuration(client, duration, sizeof(duration));
+					ShowSyncHudText(client, SyncHud_Notifaction, "%t", "freeplay_start_4", duration);
 				}
 			}
 			CPrintToChatAll("{yellow}IMPORTANT: The faster you beat waves, the more cash AND experience you'll get!");
@@ -4671,24 +4699,32 @@ bool Waves_NextFreeplayCall(bool donotAdvanceRound)
 	{
 		if(FreeplayTimeLimit < GetGameTime())
 		{
-			CPrintToChatAll("{gold}Koshi{white}: looks like you survived for an hour, hm...");
-			CPrintToChatAll("{gold}Koshi{white}: You got as far as wave {green}%i!",CurrentRound[Rounds_Default]+1);
-			if(CurrentRound[Rounds_Default]+1 < 100)
+			int wave = CurrentRound[Rounds_Default] + 1;
+			for(int client = 1; client <= MaxClients; client++)
 			{
-				CPrintToChatAll("{gold}Koshi{white}: See if you can go higher next time, dont be so lazy and stop stalling!");
-				CPrintToChatAll("{lightcyan}Zeina{white}: Finally done? I can go back home now, {lightblue}Nemal's {white}waiting on me.");
+				if(!IsClientInGame(client) || IsFakeClient(client))
+					continue;
+
+				char duration[64];
+				Freeplay_FormatDuration(client, duration, sizeof(duration));
+				CPrintToChat(client, "%t", "Freeplay End Survived", duration);
+				CPrintToChat(client, "%t", "Freeplay End Wave", wave);
+				if(wave < 100)
+				{
+					CPrintToChat(client, "%t", "Freeplay End Low Koshi");
+					CPrintToChat(client, "%t", "Freeplay End Low Zeina");
+				}
+				else if(wave < 150)
+				{
+					CPrintToChat(client, "%t", "Freeplay End Mid Koshi");
+					CPrintToChat(client, "%t", "Freeplay End Mid Zeina");
+				}
+				else
+				{
+					CPrintToChat(client, "%t", "Freeplay End High Koshi");
+					CPrintToChat(client, "%t", "Freeplay End High Zeina");
+				}
 			}
-			else if(CurrentRound[Rounds_Default]+1 >= 100 && CurrentRound[Rounds_Default]+1 < 150)
-			{
-				CPrintToChatAll("{gold}Koshi{white}: Quite a great record, i'd say... But you could go {orange}further next time.");
-				CPrintToChatAll("{lightcyan}Zeina{white}: Further!? Are you insane!?!?");
-			}
-			else
-			{
-				CPrintToChatAll("{gold}Koshi{white}: That... was {crimson}MARVELOUS! {white}Truly a spectacular training!");
-				CPrintToChatAll("{lightcyan}Zeina{white}: {red}...sometimes i really question your mental health, {gold}Koshi.");
-			}
-				
 
 			ForcePlayerWin();
 			return true;

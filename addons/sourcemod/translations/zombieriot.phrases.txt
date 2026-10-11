@@ -5817,9 +5817,79 @@
 	}
 	"freeplay_start_4"
 	{
-		"en"		"Zeina and I will watch over you, we'll warn you if something happens.\nWho am i? Koshi, the one managing this simulation.\nThis will only last an hour, so be fast!"
-		"it"		"Io e Zeina vi sorveglieremo, vi avvertiremo se dovesse succedere qualcosa.\nChi sono io? Koshi, colui che gestisce questa simulazione.\nQuesto durerà solo un'ora, quindi siate veloci!"
-		"ko"		"제이나와 내가 너희를 지켜볼게. 무슨 일이 생기면 경고할 거야.\n내가 누구냐고? 코시. 이 시뮬레이션을 관리하는 자야.\n이건 한, 1시간 쯤만 지속될 거니까, 빨리 진행해!"
+		"#format"	"{1:s}"
+		"en"		"Zeina and I will watch over you, we'll warn you if something happens.\nWho am i? Koshi, the one managing this simulation.\nThis will only last {1}, so be fast!"
+		"it"		"Io e Zeina vi sorveglieremo, vi avvertiremo se dovesse succedere qualcosa.\nChi sono io? Koshi, colui che gestisce questa simulazione.\nQuesto durerà solo {1}, quindi siate veloci!"
+		"ko"		"제이나와 내가 너희를 지켜볼게. 무슨 일이 생기면 경고할 거야.\n내가 누구냐고? 코시. 이 시뮬레이션을 관리하는 자야.\n이건 {1} 쯤만 지속될 거니까, 빨리 진행해!"
+	}
+	"Freeplay Duration Hour"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} hour"
+		"it"		"{1} ora"
+		"ko"		"{1}시간"
+	}
+	"Freeplay Duration Hours"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} hours"
+		"it"		"{1} ore"
+		"ko"		"{1}시간"
+	}
+	"Freeplay Duration Minute"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} minute"
+		"it"		"{1} minuto"
+		"ko"		"{1}분"
+	}
+	"Freeplay Duration Minutes"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} minutes"
+		"it"		"{1} minuti"
+		"ko"		"{1}분"
+	}
+	"Freeplay Duration Join"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{1} and {2}"
+		"it"		"{1} e {2}"
+		"ko"		"{1} {2}"
+	}
+	"Freeplay End Survived"
+	{
+		"#format"	"{1:s}"
+		"en"		"{gold}Koshi{white}: looks like you survived for {1}, hm..."
+	}
+	"Freeplay End Wave"
+	{
+		"#format"	"{1:d}"
+		"en"		"{gold}Koshi{white}: You got as far as wave {green}{1}!"
+	}
+	"Freeplay End Low Koshi"
+	{
+		"en"		"{gold}Koshi{white}: See if you can go higher next time, dont be so lazy and stop stalling!"
+	}
+	"Freeplay End Low Zeina"
+	{
+		"en"		"{lightcyan}Zeina{white}: Finally done? I can go back home now, {lightblue}Nemal's {white}waiting on me."
+	}
+	"Freeplay End Mid Koshi"
+	{
+		"en"		"{gold}Koshi{white}: Quite a great record, i'd say... But you could go {orange}further next time."
+	}
+	"Freeplay End Mid Zeina"
+	{
+		"en"		"{lightcyan}Zeina{white}: Further!? Are you insane!?!?"
+	}
+	"Freeplay End High Koshi"
+	{
+		"en"		"{gold}Koshi{white}: That... was {crimson}MARVELOUS! {white}Truly a spectacular training!"
+	}
+	"Freeplay End High Zeina"
+	{
+		"en"		"{lightcyan}Zeina{white}: {red}...sometimes i really question your mental health, {gold}Koshi."
 	}
 	"Loadout In Store"
 	{
