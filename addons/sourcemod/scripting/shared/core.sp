@@ -773,7 +773,7 @@ public Plugin myinfo =
 {
 	name		=	"NPC Gamemode Core",
 	author		=	"Artvin & Batfoxkid & Mikusch",
-	description	=	"Zombie Riot & Fortress Wars",
+	description	=	"Zombie Riot & Fortress Wars - MODIFIED BY Kurotama(Sakuro)",
 	version		=	"manual"
 };
 
