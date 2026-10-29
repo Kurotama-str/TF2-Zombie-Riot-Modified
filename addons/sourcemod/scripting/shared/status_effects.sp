@@ -272,16 +272,16 @@ void InitStatusEffects()
 	StatusEffects_GamemodeMadnessSZF();
 	StatusEffects_Raigeki();
 	StatusEffects_Fridge();
+	StatusEffects_IndexNurseFather();
+	StatusEffects_Gunsaw();
+	StatusEffects_Red_Mist();
 #endif
 	StatusEffects_Construction2();
 	StatusEffects_AllyInvulnDebuffs();
 	StatusEffects_Construct2_EnemyModifs();
 	StatusEffects_HeartBroken();
 	StatusEffects_ShieldLogic();
-	StatusEffects_Red_Mist();
 	StatusEffects_Barracks();
-	StatusEffects_IndexNurseFather();
-	StatusEffects_Gunsaw();
 	StatusEffects_ManaRecharge();
 	StatusEffects_NothingThere();
 }
@@ -1388,31 +1388,24 @@ bool Status_Effects_GrantAttackspeedBonus(int entity, bool HasBuff, float BuffAm
 
 static float BuffToASPD(float buff)
 {
-	return 1.0 - (1.0 / buff);
+	if(buff >= 1.0)	// Slower
+		return 1.0 - buff;
+	
+	return (1.0 / buff) - 1.0;
 }
 
 static float ASPDToBuff(float aspd)
 {
-	if(aspd <= -1.0)
-		ThrowError("We weren't ready for this")
-	
-	return 1.0 / (1.0 + aspd);
+	if(aspd <= 0.0)	// Slower
+		return 1.0 - aspd;
+
+	return (1.0 / (aspd + 1.0));
 }
 
 static void Status_effects_DoAttackspeedLogic(int entity, int type, bool GrantBuff, float BuffOriginal, int BuffCheckerID, int BuffCheckerIDNPC, int FlagAttackspeedLogicInternal)
-{	
-	bool IsCheatMode = true;
-
-	
-#if defined ZR
-	IsCheatMode = CvarInfiniteCash.BoolValue
-#endif
-	if(IsCheatMode && ((type == 3) || (type == 1 && BuffOriginal < 1.0)))
+{
+	if(type == 1)
 	{
-		// Note this will break if two buffs share the same slot but have
-		// a buffed attackspeed and the other a nerfed attackspeed
-		// (The if statement above for "type == 1 && BuffOriginal < 1.0")
-
 		float ASPDOriginal = BuffToASPD(BuffOriginal);
 
 		int i, weapon;
@@ -1554,7 +1547,7 @@ static void Status_effects_DoAttackspeedLogic(int entity, int type, bool GrantBu
 			}
 		}
 	}
-	else if(type == 1)
+	else if(type == 3)
 	{
 		int i, weapon;
 		while(TF2_GetItem(entity, weapon, i))
@@ -3350,6 +3343,7 @@ void Charge_BatteryTM_Hud_Func(int attacker, int victim, StatusEffect Apply_Mast
 
 static float Armor_Melt_ResistanceFunc(int attacker, int victim, StatusEffect Apply_MasterStatusEffect, E_StatusEffect Apply_StatusEffect, int damagetype, int basedamage)
 {
+#if defined ZR
 	int Armor=0;
 	if(IsValidClient(victim))
 	{
@@ -3368,7 +3362,7 @@ static float Armor_Melt_ResistanceFunc(int attacker, int victim, StatusEffect Ap
 		Armor_Charge[victim]=Armor;
 	else
 		view_as<CClotBody>(victim).m_flArmorCount = float(Armor);
-	
+#endif
 	return 1.0;
 }
 
@@ -4298,7 +4292,7 @@ void StatusEffects_SupportWeapons()
 	strcopy(data.AboveEnemyDisplay, sizeof(data.AboveEnemyDisplay), "");
 	//-1.0 means unused
 	data.DamageTakenMulti 			= -1.0;
-	data.DamageDealMulti			= 0.4;
+	data.DamageDealMulti			= 0.1;
 	data.MovementspeedModif			= -1.0;
 	data.Positive 					= true;
 	data.ShouldScaleWithPlayerCount = false;
@@ -5002,7 +4996,7 @@ void StatusEffects_WeaponSpecific_VisualiseOnly()
 	strcopy(data.AboveEnemyDisplay, sizeof(data.AboveEnemyDisplay), ""); //dont display above head, so empty
 	//-1.0 means unused
 	data.DamageTakenMulti 			= -1.0;
-	data.DamageDealMulti			= 0.7;
+	data.DamageDealMulti			= 0.85;
 	data.MovementspeedModif			= -1.0;
 	data.Positive 					= false;
 	data.ShouldScaleWithPlayerCount = false;
@@ -5022,7 +5016,7 @@ void StatusEffects_WeaponSpecific_VisualiseOnly()
 	data.Positive 					= true;
 	data.ShouldScaleWithPlayerCount = false;
 	
-	data.AttackspeedBuff			= (1.0 / 2.0);
+	data.AttackspeedBuff			= (1.0 / 1.60);
 	data.Slot						= 0; //0 means ignored
 	data.SlotPriority				= 0; //if its higher, then the lower version is entirely ignored.
 	StatusEffect_AddGlobal(data);
@@ -5149,7 +5143,7 @@ static void MysteryBrew_Timer(int entity, StatusEffect Apply_MasterStatusEffect,
 			int i, weapon1;
 			while(TF2_GetItem(client, weapon1, i))
 			{
-				if(i_CustomWeaponEquipLogic[weapon1] == WEAPON_BUFFPOTION)
+				if(i_CustomWeaponEquipLogic[weapon1] == /*WEAPON_BUFFPOTION*/ 144)
 				{
 					Found = true;
 					break;
@@ -8807,11 +8801,13 @@ float Perfected_Instinct_Dodge(int attacker, int victim, StatusEffect Apply_Mast
 		return 0.7;
 	if(f_TimeFrozenStill[victim] > GetGameTime(victim))
 		return 0.7;
+#if defined ZR
 	if(b_thisNpcIsARaid[victim] || EntRefToEntIndex(RaidBossActive) == victim)
 	{
 		if(GetRandomFloat(0.0, 1.0) < 0.9)
 			return 0.7;
 	}
+#endif
 	float HitChance = 0.8;
 	int MaxHealth = ReturnEntityMaxHealth(victim);
 	int Health = GetEntProp(victim, Prop_Data, "m_iHealth");
@@ -10032,6 +10028,7 @@ static void DepressingPrefix_Think(int entity, StatusEffect Apply_MasterStatusEf
 	
 	float entityPos[3], targetPos[3];
 	WorldSpaceCenter(entity, entityPos);
+#if defined ZR
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (IsClientInGame(client) && IsEntityAlive(client) && dieingstate[client] == 0)
@@ -10041,6 +10038,7 @@ static void DepressingPrefix_Think(int entity, StatusEffect Apply_MasterStatusEf
 				ApplyStatusEffect(entity, client, "Depressed", 1.5);
 		}
 	}
+#endif
 	
 	for (int i = 0; i < i_MaxcountNpcTotal; i++)
     {
@@ -10120,17 +10118,18 @@ static void PartyPopperPrefix_Think(int entity, StatusEffect Apply_MasterStatusE
 	}
 }
 
-#if defined ZR
 static void PartyPopperPrefix_DelayExplosion(int entity)
 {
 	if(!IsValidEntity(entity))
 		return;
 	
 	float DamageDeal = 10.0;
+#if defined ZR
 	DamageDeal = float(CurrentCash);
 	DamageDeal *= 0.5;
 	if(DamageDeal <= 100.0)
 		DamageDeal = 100.0;
+#endif
 	
 	CClotBody npc = view_as<CClotBody>(entity);
 	bool shouldGib = npc.m_bGib;
@@ -10179,6 +10178,23 @@ static void PartyPopperPrefix_DelayExplosion(int entity)
 	}
 }
 
+public Action Timer_ReduceLighting(Handle timer, any entid)
+{
+	int entity = EntRefToEntIndex(entid);
+	if(IsValidEntity(entity))
+	{
+		float brightness = GetEntPropFloat(entity, Prop_Send, "m_Radius");
+		brightness -= 50.0;
+		if(brightness <= 0.0)
+			brightness = 0.0;
+		SetEntPropFloat(entity, Prop_Send, "m_Radius", brightness);
+		SetEntPropFloat(entity, Prop_Send, "m_SpotRadius", brightness);
+		return Plugin_Continue;
+	}
+	else
+		return Plugin_Stop;
+}
+
 static void PartyPopperPrefix_BeforeExplosionHit(int entity, int victim, float &damage, int weapon)
 {
 	if (entity == victim)
@@ -10208,7 +10224,6 @@ static void PartyPopperPrefix_BeforeExplosionHit(int entity, int victim, float &
 		ApplyStatusEffect(entity, victim, "Party Popper Prefix", 9999.0);
 	}
 }
-#endif
 
 #define WARNING_VERTICALOFFSET 60.0
 
@@ -11162,6 +11177,12 @@ void StatusEffects_ShieldLogic()
 	strcopy(data.AboveEnemyDisplay, sizeof(data.AboveEnemyDisplay), ""); //dont display above head, so empty
 	data.Positive 					= false;
 	StatusEffect_AddGlobal(data);
+
+	strcopy(data.BuffName, sizeof(data.BuffName), "Shielding Reduce");
+	strcopy(data.HudDisplay, sizeof(data.HudDisplay), "sr");
+	strcopy(data.AboveEnemyDisplay, sizeof(data.AboveEnemyDisplay), ""); //dont display above head, so empty
+	data.Positive 					= false;
+	StatusEffect_AddGlobal(data);
 }
 
 void Shielding_End(int victim, StatusEffect Apply_MasterStatusEffect, E_StatusEffect Apply_StatusEffect)
@@ -11183,9 +11204,11 @@ stock void Shielding_Add(int victim, int valuetoadd)
 		AL_StatusEffects.GetArray(Apply_StatusEffect.BuffIndex, Apply_MasterStatusEffect);
 		if(Apply_StatusEffect.TimeUntillOver >= GetGameTime())
 		{
+#if defined ZR
 			if(!(HasSpecificBuff(victim, "Shielding Cooldown") && OperaMute_WeaponHas(victim)))
 				if(victim <= MaxClients)
 					TF2_AddCondition(victim, TFCond_RuneResist, 999999.9);
+#endif
 			Apply_StatusEffect.DataForUse += float(valuetoadd);
 			E_AL_StatusEffects[victim].SetArray(ArrayPosition, Apply_StatusEffect);
 		}
@@ -11218,10 +11241,12 @@ float Shielding_DamageTakenFunc(int attacker, int victim, StatusEffect Apply_Mas
 {
 	if(CheckInHud())
 		return 1.0;
+#if defined ZR
 	if(HasSpecificBuff(victim, "Shielding Cooldown") && OperaMute_WeaponHas(victim))
 	{
 		return 1.0;
 	}
+#endif
 	float CurrentShield = Apply_StatusEffect.DataForUse;
 	
 	int ArrayPosition = E_AL_StatusEffects[victim].FindValue(Apply_StatusEffect.BuffIndex, E_StatusEffect::BuffIndex);
@@ -11282,13 +11307,14 @@ float Shielding_DamageTakenFunc(int attacker, int victim, StatusEffect Apply_Mas
 		Apply_StatusEffect.TimeUntillOver = 0.0;
 
 		//used for opera
-		ApplyStatusEffect(victim, victim, "Shielding Cooldown", 5.0);
+		ApplyStatusEffect(victim, victim, "Shielding Cooldown", 3.0);
 	}
 	E_AL_StatusEffects[victim].SetArray(ArrayPosition, Apply_StatusEffect);
 	return 1.0;
 }	
 void Func_ShieldingHud(int attacker, int victim, StatusEffect Apply_MasterStatusEffect, E_StatusEffect Apply_StatusEffect, int SizeOfChar, char[] HudToDisplay)
 {
+#if defined ZR
 	//only display to client
 	if(OperaMute_WeaponHas(victim))
 	{
@@ -11303,9 +11329,10 @@ void Func_ShieldingHud(int attacker, int victim, StatusEffect Apply_MasterStatus
 			TF2_AddCondition(victim, TFCond_RuneResist, 999999.9);
 		}
 	}
+#endif
 	Format(HudToDisplay, SizeOfChar, "SH[%i]", RoundToNearest(Apply_StatusEffect.DataForUse));
 }
-
+#if defined ZR
 void StatusEffects_Red_Mist()
 {
 	StatusEffect data;
@@ -11464,6 +11491,7 @@ void StatusEffects_Red_Mist()
 	data.HudDisplay_Func 			= Func_Ego_VerticalSlashCD;
 	StatusEffect_AddGlobal(data);
 }
+#endif
 void StatusEffects_Barracks()
 {
 	StatusEffect data;
@@ -11645,7 +11673,7 @@ void StatusEffects_Barracks()
 	StatusEffect_AddGlobal(data);
 }
 
-
+#if defined ZR
 static void EgoManifest_Start(int victim, StatusEffect Apply_MasterStatusEffect, E_StatusEffect Apply_StatusEffect)
 {
 	float flPos[3];
@@ -11770,7 +11798,7 @@ float EgoLastman_DamageDealFunc(int attacker, int victim, StatusEffect Apply_Mas
 
 	return 0.3;
 }
-
+#endif
 void Gore_Prefix_End(int victim, StatusEffect Apply_MasterStatusEffect, E_StatusEffect Apply_StatusEffect)
 {
 	if (!b_ThisWasAnNpc[victim] || IsEntityAlive(victim))
@@ -11848,12 +11876,15 @@ static void FridgeFoodTimer(int entity, StatusEffect Apply_MasterStatusEffect, E
 		E_AL_StatusEffects[entity].SetArray(ArrayPosition, Apply_StatusEffect);
 		return;
 	}
+#if defined ZR
 	if(dieingstate[entity] != 0)
 		return;
+#endif
 	float MaxHealthPerc = float(ReturnEntityMaxHealth(entity));
 	MaxHealthPerc *= 0.015;
 	HealEntityGlobal(entity, entity, MaxHealthPerc, _, 0.0, _);
 }
+#if defined ZR
 int PoiseIndex;
 int FragileIndex;
 void StatusEffects_IndexNurseFather()
@@ -12182,7 +12213,6 @@ static void GraceEnd(int victim, StatusEffect Apply_MasterStatusEffect, E_Status
 	RemoveEntity(Apply_StatusEffect.WearableUse);
 }
 
-
 void StatusEffects_Gunsaw()
 {
 	StatusEffect data;
@@ -12249,6 +12279,7 @@ static void FuriosoAbilityEnd(int victim, StatusEffect Apply_MasterStatusEffect,
 	ExtinguishTarget(victim);
 
 }
+#endif
 void StatusEffects_ManaRecharge()
 {
 	StatusEffect data;
@@ -12294,7 +12325,7 @@ static void BlackFlames_Timer(int entity, StatusEffect Apply_MasterStatusEffect,
 			int i, weapon1;
 			while(TF2_GetItem(client, weapon1, i))
 			{
-				if(i_CustomWeaponEquipLogic[weapon1] == WEAPON_FIRE_WAND)
+				if(i_CustomWeaponEquipLogic[weapon1] == /*WEAPON_FIRE_WAND*/ 54)
 				{
 					Found = true;
 					break;
@@ -12373,6 +12404,7 @@ static void NTTimerSpawnWarn(int entity, StatusEffect Apply_MasterStatusEffect, 
 bool GurannteedForce;
 void ApplyNothingThereBuff(int victim)
 {
+#if defined ZR
 	if(!HasNTOnServer())
 		return;
 	if(CurrentRound[Rounds_Default] <= 20)
@@ -12385,6 +12417,7 @@ void ApplyNothingThereBuff(int victim)
 		GurannteedForce = false;
 		ApplyStatusEffect(victim, victim, "Nothing There Internal", GetRandomFloat(30.0,60.0));
 	}
+#endif
 }
 bool NTCheckValidNpc(int victim)
 {
@@ -12401,6 +12434,7 @@ bool NTCheckValidNpc(int victim)
 }
 static void NothingThereSpawn(int victim, StatusEffect Apply_MasterStatusEffect, E_StatusEffect Apply_StatusEffect)
 {
+#if defined ZR
 	if(!NTCheckValidNpc(victim))
 		return;
 	if(Apply_StatusEffect.DataForUse == 2.0)
@@ -12418,4 +12452,5 @@ static void NothingThereSpawn(int victim, StatusEffect Apply_MasterStatusEffect,
 	GetEntPropVector(victim, Prop_Data, "m_angRotation", ang);
 	
 	NPC_CreateByName("npc_nothing_there", -1, pos, ang, TFTeam_Red);
+#endif
 }
