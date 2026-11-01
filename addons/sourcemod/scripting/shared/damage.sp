@@ -1575,7 +1575,7 @@ static stock float NPC_OnTakeDamage_Equipped_Weapon_Logic(int victim, int &attac
         case WEAPON_KIT_OMEGA_GAUSS:
         {
             if(!CheckInHud())
-            KitOmega_NPCTakeDamage_Gauss(attacker, victim, damage, weapon);
+           	 KitOmega_NPCTakeDamage_Gauss(attacker, victim, damage, weapon);
         }
         case WEAPON_KIT_PURGE_ANNAHILATOR:
         {
