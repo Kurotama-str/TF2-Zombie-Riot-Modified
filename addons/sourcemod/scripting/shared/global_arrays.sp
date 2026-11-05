@@ -31,6 +31,7 @@ float PreventRespawnsAll;
 #define PREFIX_ONESTAND 7
 #define NOSTALGICA 8
 #define KITERS_DREAM 9
+#define BAD_BALANCE 10
 
 
 #define PERK_NONE						0
@@ -642,7 +643,7 @@ float max_mana[MAXPLAYERS];
 
 
 
-float f_AniSoundSpam[MAXPLAYERS];
+float f_AniSoundSpam[MAXENTITIES];
 int Current_Mana[MAXPLAYERS];
 float Mana_Hud_Delay[MAXPLAYERS];
 int i_WandIdNumber[MAXENTITIES]; //This is to see what wand is even used. so it does its own logic and so on.
